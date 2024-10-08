@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react"
+import SearchBox from "./components/SearchBox/SearchBox"
+import ContactList from "./components/ContactList/ContactList"
+import ContactForm from "./components/ContactForm/ContactForm"
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+  
+  const [contacts, setContacts] = useState(() => {
+    const contactsFromLocalStorage = window.localStorage.getItem("contacts");
+    if (contactsFromLocalStorage !== null) {
+      return JSON.parse(contactsFromLocalStorage)
+    }
+    return (
+      [
+        {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
+        {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
+        {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
+        {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
+      ]
+    )
+  }
   )
+
+  const [query, setQuery] = useState("")
+
+  const   visibleContacts = contacts.filter((contact) => {
+    return contact.name.toLowerCase().includes(query.toLowerCase())
+  })
+
+  const deleteContact = (contactId) => {
+    setContacts((prevContacts) => {
+      return prevContacts.filter((contact) => contact.id !== contactId);
+    }, [contacts])
+  }
+
+  const addContact = (newContact) => {
+    setContacts((prevContacts)=>{
+      return [...prevContacts, newContact]
+    })
+  }
+
+  useEffect(() => {
+    window.localStorage.setItem("contacts", JSON.stringify(contacts))
+  })
+
+    return (
+      <div>
+  <h1>Phonebook</h1>
+  <ContactForm adding={addContact}/>  
+  <SearchBox value={query} onSearch={setQuery}/>
+  <ContactList contacts={visibleContacts} onDelete={deleteContact}/>
+</div>
+
+    )
 }
 
 export default App
